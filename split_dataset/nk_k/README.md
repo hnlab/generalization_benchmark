@@ -5,7 +5,7 @@
     EC number 2.7.1 --- 2.7.4, 2.7.9---2.7.14 and 2.7.99 are considered as kinase
 
 2. KLIFS
-    Kinase download from KLIF database
+    Kinase download from [KLIF database](https://klifs.net/)
 
 3. Human_search
     If the protein name containing "kinase" in PDBbind dataset is considered as kinase
