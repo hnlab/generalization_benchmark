@@ -1,6 +1,7 @@
 ## Aims
-1. Set reasonable dataset(PDBbind v2019) split schemes to test model generalization ability on docking pose classification tasks
-2. Compare the differences when trained with different labels (binary label(0/1), original vina scores, comparable vina scores)
+1. Set reasonable dataset(PDBbind v2020) split schemes 
+2. Benchmark models generalization ability
 3. Visualize atom contribution
+4. Increase model generalization ability
 
 ## Results
