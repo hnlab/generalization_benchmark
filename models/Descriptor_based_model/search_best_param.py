@@ -145,7 +145,7 @@ def main(args):
         mae = mean_absolute_error(target, pred)
         result = [name, format(R2_score,'.4f'), format(Rp,'.4f'), format(mae,'.4f')]
         results.append(result)
-        plot_gaussian_kde_scatter_plot(pred, target, path=args["output_path"]+"/"+name+"_"+args["feature_version"]+"_"+args["model"]+".png")
+        # plot_gaussian_kde_scatter_plot(pred, target, path=args["output_path"]+"/"+name+"_"+args["feature_version"]+"_"+args["model"]+".png")
         detail_result = pd.DataFrame({'pdb':pdb, 'pred_label':pred, 'true_label':target})
         detail_result.to_csv(args["output_path"]+"/detail_data_"+name+"_"+args["feature_version"]+"_"+args["model"]+".csv", index=False)
     results = pd.DataFrame(results, columns=['name','r2','Rp', 'mae'])
