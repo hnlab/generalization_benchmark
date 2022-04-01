@@ -12,6 +12,7 @@ from Bio.PDB.Polypeptide import is_aa
 from Bio import pairwise2
 from multiprocessing import Pool, cpu_count
 from functools import partial
+from matplotlib.pyplot import get
 import scipy.cluster.hierarchy
 import numpy as np
 import pandas as pd
@@ -246,70 +247,149 @@ def loadFolds(inname, target_names, numfolds):
             assert target not in folds[i]
     return folds, foldmap
 
+def get_chain(pdb_id, only_main_chain=False, main_chain='A'):
+    chain_seq = []
+    chain_dict = {}
+    with open("/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/general_refine/"+pdb_id+"/"+pdb_id+"_protein.pdb", "r") as f:
+        for line in f.readlines():
+            if line.startswith("SEQRES"):
+                line = line.strip().split()
+                if line[2] not in chain_dict.keys():
+                    chain_dict[line[2]]=''
+                for i in range(4, len(line)):
+                    aa = line[i]
+                    if is_aa(aa, standard=True):
+                        chain_dict[line[2]] += three_to_one(aa)
+                    elif aa in {'HIE', 'HID'}:
+                        chain_dict[line[2]] += 'H'
+                    elif aa in {'CYX', 'CYM'}:
+                        chain_dict[line[2]] += 'C'
+                    else:
+                        chain_dict[line[2]] += 'X' 
+    if only_main_chain:
+        try:
+            chain_seq.append(chain_dict[main_chain])
+        except:
+            print(pdb_id)
+    else:
+        for key in chain_dict.keys():
+            chain_seq.append(chain_dict[key])
+    return chain_seq
+
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='create train/test sets for cross-validation separating by sequence similarity of protein targets and rdkit fingerprint similarity')
-    parser.add_argument('--input',type=str,default="/pubhome/hzhu02/GPSF/dataset/INDEX/native_pose_result.csv",help="basic infomation of pdbid")
-    parser.add_argument('--output_path',type=str, default="/pubhome/hzhu02/Redocked_pose/split_dataset/3_fold_ccv",help='The prefix of the output file')  
-    # parser.add_argument('-c','--check',type=str,help='input name for folds to check for similarity')
+    parser.add_argument('--input',type=str,default="/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/index/pdbbind_v2020_refine.code",help="basic infomation of pdbid")
+    parser.add_argument('--output_path',type=str, default="/pubhome/hzhu02/Redocked_pose/split_dataset/3_fold_ccv/general_refine",help='The prefix of the output file')  
+    parser.add_argument('-c','--check',type=str,help='input name for folds to check for similarity')
     parser.add_argument('-n', '--number',type=int,default=3,help="number of folds to create/check. default=3")
     parser.add_argument('-s','--similarity',type=float,default=0.5,help='what percentage similarity to cluster by. default=0.5')
-    parser.add_argument('-s2','--similarity_with_similar_ligand',type=float,default=0.3,help='what percentage similarity to cluster by when ligands are similar default=0.3')
+    parser.add_argument('-s2','--similarity_with_similar_ligand',type=float,default=0.4,help='what percentage similarity to cluster by when ligands are similar default=0.4')
     parser.add_argument('-l','--ligand_similarity',type=float,default=0.9,help='similarity threshold for ligands, default=0.9')
-    parser.add_argument('--randomize',required=False,type=int,default=4,help='randomize inputs to get a different split, number is random seed')
-    args = parser.parse_args()
+    parser.add_argument('--randomize',required=False,type=int,default=0,help='randomize inputs to get a different split, number is random seed')
+    parser.add_argument('--main_chain_file', type=str, default="/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/general/general_refine_main_chain_merge.csv")
+    parser.add_argument('--only_main_chain', type=bool, default=True)
+    args = parser.parse_args().__dict__
 
+    threshold = 1 - args["similarity"] #similarity and distance are complementary
+    threshold2 = 1 - args["similarity_with_similar_ligand"]
+    ligand_threshold = args["ligand_similarity"] #this actually is a sim"]
 
-    threshold = 1 - args.similarity #similarity and distance are complementary
-    threshold2 = 1 - args.similarity_with_similar_ligand
-    ligand_threshold = args.ligand_similarity #this actually is a sim
-
-    complex_file=pd.read_csv(args.input, sep=",", header=None)
-    complex_file.columns=['num','pdb_code','decoy_complex','rmsd','binary_type','multi_type', 'affinity','vina']
-    ##make sure 2e43 would not read as 2e00000000+6
-    complex_file['pdb_code']=complex_file['pdb_code'].apply(lambda x: str(x)[0]+str(x).split("+")[0][-1]+str(x).split("+")[1] if len(str(x))>4 else str(x))
+    # calulate protein pairwise similarity
+    # protein_seq = []
+    # if args['only_main_chain']:
+    #     main_chain_file = pd.read_csv(args['main_chain_file'],sep=",")
+    #     pdbid_list = main_chain_file['pdb'].tolist()
+    #     main_chain_list = main_chain_file['chain'].tolist()
     
-    ### get protein sequence similarity matrix
-    pdb_parser = PDBParser(PERMISSIVE=1, QUIET=1)
-    pdbid_list = complex_file['pdb_code'].tolist()
-    protein_seq = []
-    fingerprints = dict()
-    for pdbid in pdbid_list:
-        structure= pdb_parser.get_structure(pdbid, "/pubhome/hzhu02/GPSF/dataset/data/result/"+str(pdbid)+"/"+str(pdbid)+"_protein.pdb")
-        seqs = getResidueStrings(structure)
-        protein_seq.append(seqs)
-        supplier = Chem.SDMolSupplier("/pubhome/hzhu02/GPSF/dataset/data/result/"+str(pdbid)+"/"+str(pdbid)+"_ligand.fixed.sdf", sanitize=False, removeHs=False)
-        mol = supplier[0]
-        fp = FingerprintMols.FingerprintMol(mol)
-        fingerprints[pdbid] = fp
+        
+        # for i in range(len(pdbid_list)):
+        #     pdbid = pdbid_list[i]
+        #     main_chain = main_chain_list[i]
+        #     print(pdbid)
+        #     seqs = get_chain(pdb_id=pdbid, only_main_chain=True, main_chain=main_chain)
+        #     protein_seq.append(seqs)
+
+    # else:
+    #     complex_file=pd.read_csv(args["input"], header=None)
+    #     complex_file.columns=['pdb_code']
+    #     ##make sure 2e43 would not read as 2e00000000+6
+    #     complex_file['pdb_code']=complex_file['pdb_code'].apply(lambda x: str(x)[0]+str(x).split("+")[0][-1]+str(x).split("+")[1] if len(str(x))>4 else str(x))
     
-    print('Number of targets: {}'.format(len(pdbid_list)))
+    #     ## get protein sequence similarity matrix
+
+    #     pdbid_list = complex_file['pdb_code'].tolist()
+    #     for pdbid in pdbid_list:
+    #         seqs = get_chain(pdbid=pdbid)
+    #         protein_seq.append(seqs)
+
+    
+    # print('Number of targets: {}'.format(len(pdbid_list)))
 
 
-    protein_smi_matrix = calProteinDistanceMatrix(protein_seq)
-    mol_fp_smi_matrix = calLigandSimilarity(fingerprints, pdbid_list)
+    # protein_smi_matrix = calProteinDistanceMatrix(protein_seq)
+    # mol_fp_smi_matrix = calLigandSimilarity(fingerprints, pdbid_list)
 
-    pd.DataFrame(protein_smi_matrix, columns=pdbid_list).to_csv(args.output_path + "/protein_smi_pdbbind_2019.csv")
-    pd.DataFrame(mol_fp_smi_matrix, columns=pdbid_list).to_csv(args.output_path + "/mol_smi_pdbbind_2019.csv")
+    # pd.DataFrame(protein_smi_matrix, columns=pdbid_list).to_csv(args["output_path"] + "/protein_smi_only_main_chain_general_refine_pdbbind_2020.csv")
 
-    cluster_groups = calcClusterGroups(protein_smi_matrix, mol_fp_smi_matrix, pdbid_list, threshold, threshold2, ligand_threshold)
+    ## calculate ligand fingerprint similarity
+
+
+
+
+    # calculate ligand fingerprint similarity
+    # fingerprint={}
+    # for pdb in pdbid_list:
+    #     print(pdb)
+    #     # supplier = Chem.SDMolSupplier("/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/general_refine/"+pdb+"/"+pdb+"_ligand.sdf", sanitize=False, removeHs=False)
+    #     # mol = supplier[0]
+    #     mol = Chem.MolFromPDBFile("/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/general_refine/"+pdb+"/"+pdb+"_ligand_ob.pdb", sanitize=False, removeHs=False)
+    #     fp = FingerprintMols.FingerprintMol(mol)
+    #     fingerprint[pdb] = fp
+    
+    # ligand_similarity = calLigandSimilarity(fingerprint, pdbid_list)
+    # pd.DataFrame(ligand_similarity, columns=pdbid_list).to_csv(args["output_path"] + "/ligand_similarity_pdbbind_general_refine_2020.csv", index=False)
+    
+    protein_dist = pd.read_csv("/pubhome/hzhu02/Redocked_pose/split_dataset/3_fold_ccv/protein_smi_pdbbind_2020.csv")
+    protein_dist.drop(columns=['Unnamed: 0'], inplace=True)
+    pdb_list = protein_dist.columns.tolist()
+    protein_smi_matrix = np.array(protein_dist)
+
+    ligand_similarity = pd.read_csv("/pubhome/hzhu02/Redocked_pose/split_dataset/3_fold_ccv/ligand_similarity_pdbbind_2020.csv")
+    ligand_similarity = np.array(ligand_similarity)
+    if args["randomize"] != None:
+        np.random.seed(args["randomize"])
+        n = len(pdb_list)
+        indices = np.random.choice(n,n,False)
+        target_names = list(np.array(pdb_list)[indices])
+        distanceMatrix = protein_smi_matrix[indices]
+        distanceMatrix = distanceMatrix[:,indices]
+        ligandsim = ligand_similarity[indices]
+        ligandsim = ligandsim[:,indices]
+
+    cluster_groups = calcClusterGroups(distanceMatrix, ligandsim, target_names, threshold, threshold2, ligand_threshold)
     print('{} clusters created'.format(len(cluster_groups)))
-
+    
     for i, g in enumerate(cluster_groups):
         print('Cluster {}: {}'.format(i, ' '.join(str(t) for t in g)))
 
     print("Max cluster size: %d" % np.max([len(c) for c in cluster_groups]))
-    folds, foldmap = createFolds(cluster_groups, args.number, args.randomize)
-    for i, fold in enumerate(folds):
-        print('{} targets in fold {}'.format(len(fold), i+1))
-        write_file('%s%s'%(args.output_path+"/subset", i+1), '\n'.join(fold))
 
-    
+    # folds, foldmap = createFolds(cluster_groups, args["number"], args["randomize"])
+    # for i, fold in enumerate(folds):
+    #     print('{} targets in fold {}'.format(len(fold), i+1))
+    #     write_file('%s%s'%(args["output_path"]+"/subset_", i+1), '\n'.join(fold))
 
-    # folds, foldmap = loadFolds(args.check, target_names, args.number)
-    # print('Checking {} train/test folds for {:.3f}% similarity'.format(args.check, 100*args.similarity))
+    # folds, foldmap = loadFolds(args["check"], target_names, args["number"])
+    # print('Checking {} train/test folds for {:.3f}% similarity'.format(args["check"], 100*args["similarity"]))
     # checkFolds(distanceMatrix, target_names, threshold, foldmap)
+
+
+
+
+
+
 
 
     
