@@ -16,4 +16,3 @@
 |subset|kinase|nonkinase|
 |---|---|---|
 |Refine|491|4361|
-|General|
