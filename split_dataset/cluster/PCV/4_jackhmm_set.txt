@@ -1,0 +1,15 @@
+# jackhmmer :: iteratively search a protein sequence against a protein database
+# HMMER 3.1b2 (February 2015); http://hmmer.org/
+# Copyright (C) 2015 Howard Hughes Medical Institute.
+# Freely distributed under the GNU General Public License (GPLv3).
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# query sequence file:             /pubhome/hzhu02/Redocked_pose/split_dataset/pfam/refine/seq/pdbbind_2020_pfam_nonredundant_seq.fa
+# target sequence database:        /pubhome/hzhu02/Redocked_pose/split_dataset/pfam/refine/seq/pdbbind_2020_pfam_nonredundant_seq.fa
+# maximum iterations set to:       10
+# per-seq hits tabular output:     ./tblout
+# sequence reporting threshold:    score <= 0
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Query:       1n46  [L=189]
+
+Scores for complete sequences (score includes all domains):
