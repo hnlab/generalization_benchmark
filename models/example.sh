@@ -1,5 +1,6 @@
 ## 1.extract rfscore feature
 python ./extract_feature/extract_rf_feature.py
+## merged rfscore v1, v2, nnscore, cyscore, and xscore features is in merged_features.csv file 
 ## 2.change the feature file in utils.py line 23
 ## 3.search best parameters
 python ./Descriptor_based_model/search_best_param.py --model RF --feature_version VR1 

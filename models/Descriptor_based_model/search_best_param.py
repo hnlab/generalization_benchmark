@@ -159,11 +159,11 @@ def main(args):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Protein-Ligand Binding affinity Prediction')
-    parser.add_argument("--train_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/general_core/train.csv",help="training dataset")
-    parser.add_argument("--valid_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/general_core/valid.csv",help="training dataset")
-    parser.add_argument("--test_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/core.csv", help="testing dataset")
+    parser.add_argument("--train_data", type=str, default="./test_file/train.csv",help="training dataset")
+    parser.add_argument("--valid_data", type=str, default="./test_file/valid.csv",help="training dataset")
+    parser.add_argument("--test_data", type=str, default="./test_file/core.csv", help="testing dataset")
     parser.add_argument("--output_path", type=str)
-    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC','PLEC','selected', 'three_selected','ten_selected','nine_selected','VR1_MW'])
+    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC','PLEC'])
     parser.add_argument("--model", type=str, choices=['LR','RF','XGB','NN','SGDR'])
     args = parser.parse_args()
     args = parser.parse_args().__dict__

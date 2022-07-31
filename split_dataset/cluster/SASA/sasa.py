@@ -54,26 +54,21 @@ if __name__ == '__main__':
     args = parser.parse_args().__dict__
 
 
-    all_pdb = pd.read_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/models/general_3_fold_summary/SASA/left_pdb_sasa.csv", header=None)
+    all_pdb = pd.read_csv("../PCV/input_file/pdbbind_v2020_general.txt", header=None)
     all_pdb.columns=['pdb']
 
     Metrics = ('pdb\tligand_sasa\tprotein_sasa\tcomplex_sasa\tdelta_sasa')
-    # ready_success_file= pd.read_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/models/general_3_fold_summary/succese_already.csv", sep="\t")
-    # success_pdb = ready_success_file['pdb'].to_list()
-    # success_pdb = success_pdb+['2x7u','1qk3']
+
     pdb_list = all_pdb['pdb'].to_list()
     with open(args["output"], 'w') as f:
         f.write(Metrics + '\n')
-    # for line in all_pdb.iterrows():
-    #     _, row = line
-    #     pdb = row['pdb']
+
     for pdb in pdb_list[args["input"]:args["input"]+1]:
-        # if pdb not in success_pdb:
-            # print(pdb)
+
         try:
-            ligand = md.load("/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/general_refine/"+pdb+"/"+pdb+"_ligand_ob_new.pdb")
-            protein = md.load("/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/general_refine/"+pdb+"/"+pdb+"_protein_new.pdb")
-            complex = md.load("/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/general_refine/"+pdb+"/"+pdb+"_complex_new.pdb")
+            ligand = md.load("./"+pdb+"/"+pdb+"_ligand_ob_new.pdb")
+            protein = md.load("./"+pdb+"/"+pdb+"_protein_new.pdb")
+            complex = md.load("./"+pdb+"/"+pdb+"_complex_new.pdb")
             lig_sa = np.sum(md.shrake_rupley(ligand))
             pro_sa = np.sum(md.shrake_rupley(protein))
             com_sa = np.sum(md.shrake_rupley(complex))
@@ -82,16 +77,4 @@ if __name__ == '__main__':
                 f.write("\t".join(map(str, [pdb,lig_sa,pro_sa,com_sa,del_sa]))+'\n')
         except:
             print(pdb)
-        # fail_sasa.append(pdb)
-        # i+=1
-    # if i%500==0:
-    #     print(i)
-# success_sasa = pd.DataFrame(success_sasa, columns=['pdb','ligand_sasa','protein_sasa','complex_sasa','delta_sasa'])
-# success_sasa.to_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/models/general_3_fold_summary/success_sasa.csv", index=False)
-# fail_sasa = pd.DataFrame(fail_sasa, columns=['pdb'])
-# fail_sasa.to_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/models/general_3_fold_summary/fail_sasa.csv", index=False)
-# all_pdb['ligand_SASA']=ligand_SASA
-# all_pdb['protein_SASA'] = protein_SASA
-# all_pdb['complex_SASA'] = complex_SASA
-# all_pdb['delta_SASA'] = delta_SASA
-# all_pdb.to_csv("/pubhome/hzhu02/GPSF/dataset/INDEX/split/hmm/jackhmmer/general/general_refine_classified.csv", index=False)
+

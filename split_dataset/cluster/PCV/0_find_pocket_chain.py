@@ -62,14 +62,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="From_pdbid_to_Pfam_to_clan")
     parser.add_argument("--pdbid_list", type=str, help="path to pdbid list",
-                            default="/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/pdbbind_v2020_general.txt") 
-    parser.add_argument("--output_path",type=str, help="output path", default="/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/general")
+                            default="./input_file/pdbbind_v2020_general.txt") 
+    parser.add_argument("--output_path",type=str, help="output path", default="./step_file")
     parser.add_argument("--clans", type=str, help="path to clans.tsv", 
-                            default="/pubhome/hzhu02/GPSF/dataset/INDEX/split/clans.tsv")
+                            default="./input_file/clans.tsv")
     parser.add_argument("--pdb_pfam_mapping", type=str, help="path to pdb_pfam_mapping.csv", 
-                            default="/pubhome/hzhu02/GPSF/dataset/INDEX/split/pdb_pfam_mapping.csv")
+                            default="./input_file/pdb_pfam_mapping.csv")
     parser.add_argument("--pocket_file", type=str, help="path to pdbid_pocket.pdb file",
-                            default="/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/v2020-other-PL")
+                            default="./input_file")
     args = parser.parse_args().__dict__
 
 

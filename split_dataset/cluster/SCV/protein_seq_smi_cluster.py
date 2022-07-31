@@ -251,7 +251,7 @@ def loadFolds(inname, target_names, numfolds):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='create train/test sets for cross-validation separating by sequence similarity of protein targets and rdkit fingerprint similarity')
     parser.add_argument('--input',type=str,default="/pubhome/hzhu02/GPSF/dataset/INDEX/native_pose_result.csv",help="basic infomation of pdbid")
-    parser.add_argument('--output_path',type=str, default="/pubhome/hzhu02/Redocked_pose/split_dataset/3_fold_ccv",help='The prefix of the output file')  
+    parser.add_argument('--output_path',type=str, default="./",help='The prefix of the output file')  
     # parser.add_argument('-c','--check',type=str,help='input name for folds to check for similarity')
     parser.add_argument('-n', '--number',type=int,default=3,help="number of folds to create/check. default=3")
     parser.add_argument('-s','--similarity',type=float,default=0.5,help='what percentage similarity to cluster by. default=0.5')
@@ -276,10 +276,10 @@ if __name__ == '__main__':
     protein_seq = []
     fingerprints = dict()
     for pdbid in pdbid_list:
-        structure= pdb_parser.get_structure(pdbid, "/pubhome/hzhu02/GPSF/dataset/data/result/"+str(pdbid)+"/"+str(pdbid)+"_protein.pdb")
+        structure= pdb_parser.get_structure(pdbid, "./"+str(pdbid)+"/"+str(pdbid)+"_protein.pdb") ## load correct path to protein files
         seqs = getResidueStrings(structure)
         protein_seq.append(seqs)
-        supplier = Chem.SDMolSupplier("/pubhome/hzhu02/GPSF/dataset/data/result/"+str(pdbid)+"/"+str(pdbid)+"_ligand.fixed.sdf", sanitize=False, removeHs=False)
+        supplier = Chem.SDMolSupplier("./"+str(pdbid)+"/"+str(pdbid)+"_ligand.fixed.sdf", sanitize=False, removeHs=False) ## load correct path to ligand files
         mol = supplier[0]
         fp = FingerprintMols.FingerprintMol(mol)
         fingerprints[pdbid] = fp
@@ -290,8 +290,8 @@ if __name__ == '__main__':
     protein_smi_matrix = calProteinDistanceMatrix(protein_seq)
     mol_fp_smi_matrix = calLigandSimilarity(fingerprints, pdbid_list)
 
-    pd.DataFrame(protein_smi_matrix, columns=pdbid_list).to_csv(args.output_path + "/protein_smi_pdbbind_2019.csv")
-    pd.DataFrame(mol_fp_smi_matrix, columns=pdbid_list).to_csv(args.output_path + "/mol_smi_pdbbind_2019.csv")
+    pd.DataFrame(protein_smi_matrix, columns=pdbid_list).to_csv(args.output_path + "/protein_smi_pdbbind_2019.csv") ## output file is large !!!
+    pd.DataFrame(mol_fp_smi_matrix, columns=pdbid_list).to_csv(args.output_path + "/mol_smi_pdbbind_2019.csv") ## output file is large !!!
 
     cluster_groups = calcClusterGroups(protein_smi_matrix, mol_fp_smi_matrix, pdbid_list, threshold, threshold2, ligand_threshold)
     print('{} clusters created'.format(len(cluster_groups)))

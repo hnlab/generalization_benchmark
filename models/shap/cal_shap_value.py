@@ -67,6 +67,6 @@ for i in range(1,4):
     test_set = pd.merge(test_set, all_pdb, on=['pdb','affinity'])
 
     shap_values = explainer.shap_interaction_values(test_set[feature_list])
-    np.save("/pubhome/hzhu02/GPSF/generalization_benchmark/models/general_3_fold_summary/RF_feature/pcv_training_shap_"+str(i)+".npy", shap_values)
+    np.save("./pcv_training_shap_"+str(i)+".npy", shap_values)
 
 

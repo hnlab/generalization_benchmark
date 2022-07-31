@@ -15,17 +15,17 @@ def change_str_to_list (res_str):
     return a
 
 Metrics = ('pdb\tmain_chain\tres_num\tpfam\tpfam_name\tpdb_start\tpdb_end\tcov_num\tclan_acc\tclan_id\tuniport')
-with open("/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/refine/pdbbind_v2020_main_chain_PDBpfam_info.csv", 'w') as f:
+with open("./step_file/pdbbind_v2020_main_chain_PDBpfam_info.csv", 'w') as f:
     f.write(Metrics + '\n')
 
-with open("/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/refine/pdbbind_v2020_main_chain_pfam_not_find_info.csv", 'w') as f:
+with open("./step_file/pdbbind_v2020_main_chain_pfam_not_find_info.csv", 'w') as f:
     f.write(Metrics + '\n')
 
 pdb_file = pd.read_csv("/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/index/pdbbind_v2020_refine.code", header =None)
 pdb_file.columns=['PDB']
 pdb_list = pdb_file['PDB'].tolist()
-all_chain=pd.read_csv("/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/refine/pdbbind_v2020_refine_all_pocket_chain_info.csv")
-mapping_file = pd.read_csv("/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/pdb_pfam_clan.csv")
+all_chain=pd.read_csv("./step_file/pdbbind_v2020_refine_all_pocket_chain_info.csv")
+mapping_file = pd.read_csv("./input_file/pdb_pfam_mapping.csv")
 
 
 for pdb in pdb_list:
@@ -45,11 +45,11 @@ for pdb in pdb_list:
                 num = len(list(set(res_list).intersection(set(domain))))
                 item = [pdb, main_chain, len(res_list),select_file[i:i+1]['PFAM_ACCESSION'].tolist()[0], select_file[i:i+1]['PFAM_NAME'].tolist()[0],num_start, num_end, num,select_file[i:i+1]['clan_acc'].tolist()[0],select_file[i:i+1]['clan_id'].tolist()[0],select_file[i:i+1]['UNIPROT_ACCESSION'].tolist()[0]]
             
-                with open("/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/refine/pdbbind_v2020_main_chain_pfam_info.csv", 'a') as f:
+                with open("./step_file/pdbbind_v2020_main_chain_pfam_info.csv", 'a') as f:
                     f.write("\t".join(map(str, item))+'\n')
     else:
         item = [pdb, main_chain, len(res_list),None,None,None,None,None,None,None,None ]
-        with open("/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/refine/pdbbind_v2020_main_chain_pfam_not_find_info.csv", 'a') as f:
+        with open("./step_file/pdbbind_v2020_main_chain_pfam_not_find_info.csv", 'a') as f:
             f.write("\t".join(map(str, item))+'\n')
 
 

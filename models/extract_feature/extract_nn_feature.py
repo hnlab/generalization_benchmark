@@ -18,16 +18,15 @@ def extract_nn_feature(ligand, protein):
 
 
 
-pdbbind = pd.read_csv("/pubhome/hzhu02/GPSF/dataset/INDEX/split/hmm/jackhmmer/general/general_affinity_mw.csv", sep=",")
-# pdbbind = pd.read_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/models/RFScore/test.csv", header=None, sep=",")
-# pdbbind.columns=['pdb','affinity']
+pdbbind = pd.read_csv("./", sep=",") ## load pdbid list
+
 
 
 for i in range(pdbbind.shape[0]):
     pdb = pdbbind.iloc[i,]['pdb']
     print(pdb)
-    protein = next(oddt.toolkits.ob.readfile('pdb', '/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/v2020-other-PL/'+pdb+'/'+pdb+'_protein.pdb'))
-    ligand = next(oddt.toolkits.ob.readfile('sdf', '/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/v2020-other-PL/'+pdb+'/'+pdb+'_ligand.sdf'))
+    protein = next(oddt.toolkits.ob.readfile('pdb', '/'+pdb+'/'+pdb+'_protein.pdb'))
+    ligand = next(oddt.toolkits.ob.readfile('sdf', '/'+pdb+'/'+pdb+'_ligand.sdf'))
     if i == 0:
         title, feature = extract_nn_feature(ligand, protein)
     else:
@@ -41,7 +40,7 @@ data = pd.DataFrame(feature, columns=title)
 data['pdb'] = pdbbind['pdb'].tolist()
 data['affinity'] = pdbbind['affinity'].tolist()
 
-data.to_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/models/NNScore/extract_nn_feature/nnscore_general_feature.csv", index=False)
+data.to_csv("./nnscore_general_feature.csv", index=False)
     
 
 

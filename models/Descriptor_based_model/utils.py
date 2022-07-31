@@ -20,7 +20,7 @@ import xgboost as xgb
 from sklearn.linear_model import SGDRegressor
 
 def load_dataset(train, valid, test, feature_version):
-    features = pd.read_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/descriptors/refine_general_features.csv")
+    features = pd.read_csv("../extract_feature/merged_features.csv")
     vina_title =['vina_gauss1_x',
                 'vina_gauss2_x',
                 'vina_repulsion_x',
@@ -64,8 +64,8 @@ def load_dataset(train, valid, test, feature_version):
     elif feature_version == "nine_selected":
         feature_list = ['6.9','6.6','8.17','8.6','vina_hydrogen_x','16.16','16.9','7.16','8.15']
     elif feature_version == "PLEC":
-        general_features_PLEC = pd.read_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/models/PLECScore/extract_PLEC_feature/PLEC_general_feature.csv")
-        refine_features_PLEC = pd.read_csv("/pubhome/hzhu02/GPSF/generalization_benchmark/models/PLECScore/extract_PLEC_feature/PLEC_feature.csv")
+        general_features_PLEC = pd.read_csv("/PLEC_general_feature.csv")
+        refine_features_PLEC = pd.read_csv("/PLEC_feature.csv")
         pdbbind_PLEC = pd.concat([refine_features_PLEC, general_features_PLEC])
         title=pdbbind_PLEC.columns.tolist()
         title.remove("pdb")
@@ -76,7 +76,7 @@ def load_dataset(train, valid, test, feature_version):
     else: 
         feature_list = vina_title + cyscore_title + xscore_title  ## only for refine
 
-    all_pdb = pd.read_csv("/pubhome/hzhu02/GPSF/dataset/INDEX/split/hmm/jackhmmer/general/general_refine_classified.csv")
+    all_pdb = pd.read_csv("../split_dataset/cluster/pdbbind_2020_cluster_result.csv")
     train_code = pd.read_csv(train, header=None)
     train_code.columns=['pdb', 'affinity']
     train_code = pd.merge(train_code, all_pdb[['pdb','mol_weight']], on=['pdb'])

@@ -4,7 +4,8 @@ from Bio.PDB.Polypeptide import is_aa
 import re
 
 def get_chain(pdb_id, chain):
-    with open("/pubhome/hzhu02/GPSF/dataset/pdbbind_v2020/v2020-other-PL/"+pdb_id+"/"+pdb_id+"_protein.pdb", "r") as f:
+    ## load correct path to protein files
+    with open("/"+pdb_id+"/"+pdb_id+"_protein.pdb", "r") as f:
         chain_seq = {}
         for line in f.readlines():
             line = line.strip().split()
@@ -32,11 +33,11 @@ def get_chain(pdb_id, chain):
     return chain_seq
 
 
-not_found_pdb = pd.read_csv("/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/general/not_find_pfam.code", header=None)
+not_found_pdb = pd.read_csv("./step_file/not_find_pfam.code", header=None)
 not_found_pdb.columns=['pdb']
 
 pdb_list = not_found_pdb['pdb'].tolist()
-all_chain = pd.read_csv("/pubhome/hzhu02/Redocked_pose/split_dataset/pfam/general/pdbbind_v2020_general_step_1_all_pocket_chain_info.csv")
+all_chain = pd.read_csv("./step_file/pdbbind_v2020_general_step_1_all_pocket_chain_info.csv")
 
 num=0
 for pdb in pdb_list:
@@ -58,11 +59,13 @@ for pdb in pdb_list:
             # print(i)
             seq += chain_seq[i]
         except:
-            # print("worning pdn seq not continue", pdb)
+            # print("warning pdb seq not continue", pdb)
             num += 1
 
     print(">"+pdb)
     print(seq)
+
+## output file is ./step_file/pdbbind_v2020_main_pfam_seq.fa and ./step_file/not_found_pdb_all_seq.fa
  
 
 

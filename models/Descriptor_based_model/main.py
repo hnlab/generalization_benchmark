@@ -60,13 +60,8 @@ def main(args):
         model.fit(train_set[feature_list], train_set["affinity"])
 
     elif args["model"] == "LR":
-        # model1 = LinearRegression(positive=True, fit_intercept=True).fit(train_set[feature_list], train_set['affinity'])
-        # model1_valid_r2 = r2_score(model1.predict(valid_set[feature_list]), valid_set['affinity'])
         model = LinearRegression(positive=True, fit_intercept=False).fit(train_set[feature_list], train_set['affinity'])
-        # if model1_valid_r2 > model2_valid_r2:
-        #     model = model1
-        # else:
-        #     model = model2
+
     
     elif args["model"] == "NN":
 
@@ -137,9 +132,9 @@ def main(args):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Protein-Ligand Binding affinity Prediction')
-    parser.add_argument("--train_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/xaa",help="training dataset")
-    parser.add_argument("--valid_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/xab",help="training dataset")
-    parser.add_argument("--test_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/core.csv", help="testing dataset")
+    parser.add_argument("--train_data", type=str, default="split_dataset/3_fold/results/PCV/1/fold_1",help="training dataset")
+    parser.add_argument("--valid_data", type=str, default="split_dataset/3_fold/results/PCV/1/fold_1",help="training dataset")
+    parser.add_argument("--test_data", type=str, default="split_dataset/3_fold/results/PCV/1/fold_1", help="testing dataset")
     parser.add_argument("--rf_max_features", type=int, default=4)
     parser.add_argument("--rf_n_estimator",type=int, default=400)
     parser.add_argument("--xgb_max_depth",type=int)
@@ -153,7 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--sgdr_epsilon", type=float, default=0.1)
     parser.add_argument("--sgdr_es", type=bool, default=False)
     parser.add_argument("--output_path", type=str)
-    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC','PLEC','selected','ten_selected','three_selected','VR1_MW'])
+    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC'])
     parser.add_argument("--model", type=str, choices=['LR','RF','XGB','NN','SGDR','NN+'])
     args = parser.parse_args()
     args = parser.parse_args().__dict__
