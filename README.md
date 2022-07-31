@@ -1,6 +1,6 @@
 # [Assessing the generalization abilities of machine-learning scoring functions for structure-based virtual screening](https://chemrxiv.org/engage/chemrxiv/article-details/62d53f80fe12e38913a7e287)
 Author: Hui Zhu, Jincai Yang*, and Niu Huang*
-![](https://github.com/hnlab/Generalization_benckmark/blob/main/plot_scripts/png/Cover_Picture.png)
+![](https://github.com/hnlab/generalization_benchmark/blob/main/png/Cover_Picture.png)
 
 ## Explanation
 **split_dataset/cluster** collected scripts of Pocket Pfam-based clustering (Pfam-cluster) and Protein sequence-based clustering (Seq-cluster). *pdbbind_2020_cluster_result.csv* contained results of two clustering approaches
