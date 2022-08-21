@@ -10,6 +10,15 @@ Author: Hui Zhu, Jincai Yang*, and Niu Huang*
 
 **models/Descriptor_based_model**  contained source code of LR::V, LR::VR1, RF-Score, XGB::VR1 and NNScore. Other evaluated models were downloaded from individual paper.
 
+|Models|Availability|
+|--|--|
+|Pafnucy|http://gitlab.com/cheminfIBB/pafnucy|
+|OnionNet|http://github.com/zhenglz/onionnet/|
+|SG-CNN|https://github.com/llnl/fast|
+|IGN|https://github.com/zjujdj/InteractionGraphNet/tree/master|
+|SIGN|https://github.com/PaddlePaddle/PaddleHelix/tree/dev/apps/drug_target_interaction/sign|
+|GraphBAR|https://github.com/jtson82/graphbar|
+
 **models/shap** is the Shapley Additive exPlanations (SHAP) analysis on RF-Score
 
 
