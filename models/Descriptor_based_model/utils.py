@@ -7,7 +7,6 @@ import seaborn as sns
 from scipy.stats import gaussian_kde
 import oddt
 from sklearn.ensemble import RandomForestRegressor
-import pickle
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import PredefinedSplit
 import matplotlib.pyplot as plt
@@ -20,7 +19,7 @@ import xgboost as xgb
 from sklearn.linear_model import SGDRegressor
 
 def load_dataset(train, valid, test, feature_version):
-    features = pd.read_csv("../extract_feature/merged_features.csv")
+    features = pd.read_csv("/pubhome/hzhu02/models/Redocked_pose/models/extract_feature/merged_features.csv")
     vina_title =['vina_gauss1_x',
                 'vina_gauss2_x',
                 'vina_repulsion_x',
@@ -73,10 +72,75 @@ def load_dataset(train, valid, test, feature_version):
         feature_list = title
     elif feature_version =="VR1_MW":
         feature_list = vina_title + rf_v1_title + ['mol_weight']
+
+    elif feature_version == "DeltaVina":
+        sasa_feature=['P', 'N', 'DA', 'D', 'A', 'AR', 'H', 'PL', 'HA','ALL']
+        vina_titles=['Autodockvina_pkd',
+            'ad4_solvation(charge=T)', 
+            'ad4_solvation(charge=F)',
+            'electrostatic(x=1)', 
+            'electrostatic(x=2)', 
+            'gauss(0,0.3)', 
+            'gauss(0.5,0.3)', 
+            'gauss(1,0.3)', 
+            'gauss(1.5,0.3)', 
+            'gauss(2,0.3)', 
+            'gauss(2.5,0.3)', 
+            'gauss(0,0.5)', 
+            'gauss(1,0.5)', 
+            'gauss(2,0.5)', 
+            'gauss(0,0.7)', 
+            'gauss(1,0.7)', 
+            'gauss(2,0.7)', 
+            'gauss(0,0.9)', 
+            'gauss(1,0.9)', 
+            'gauss(2,0.9)', 
+            'gauss(3,0.9)', 
+            'gauss(0,1.5)', 
+            'gauss(1,1.5)', 
+            'gauss(2,1.5)', 
+            'gauss(3,1.5)', 
+            'gauss(4,1.5)', 
+            'gauss(0,2)', 
+            'gauss(1,2)', 
+            'gauss(2,2)', 
+            'gauss(3,2)', 
+            'gauss(4,2)', 
+            'gauss(0,3)', 
+            'gauss(1,3)', 
+            'gauss(2,3)', 
+            'gauss(3,3)', 
+            'gauss(4,3)', 
+            'repulsion(0.4)', 
+            'repulsion(0.2)', 
+            'repulsion(0.0)', 
+            'repulsion(-0.2)', 
+            'repulsion(-0.4)',
+            'repulsion(-0.6)', 
+            'repulsion(-0.8)', 
+            'repulsion(-1.0)', 
+            'hydrophobic(0.5,1)', 
+            'hydrophobic(0.5,1.5)', 
+            'hydrophobic(0.5,2)', 
+            'hydrophobic(0.5,3)', 
+            'non_hydrophobic(0.5,1.5)', 
+            'vdw(4,8)', 
+            'non_dir_h_bond(-0.7,0)', 
+            'non_dir_h_bond(-0.7,0.2)', 
+            'non_dir_h_bond(-0.7,0.4)', 
+            'num_tors', 
+            'num_rotors', 
+            'num_heavy_atoms', 
+            'num_hydrophobic_atoms', 
+            'ligand_max_num_h_bonds', 
+            'ligand_length']
+        idx10 = [0, 2, 52, 54, 53, 55, 3, 51, 57, 47]
+        vina_features = [vina_titles[i+1] for i in idx10]
+        feature_list=sasa_feature+vina_features
     else: 
         feature_list = vina_title + cyscore_title + xscore_title  ## only for refine
 
-    all_pdb = pd.read_csv("../split_dataset/cluster/pdbbind_2020_cluster_result.csv")
+    all_pdb = pd.read_csv("/pubhome/hzhu02/models/Redocked_pose/split_dataset/cluster/pdbbind_2020_cluster_result.csv")
     train_code = pd.read_csv(train, header=None)
     train_code.columns=['pdb', 'affinity']
     train_code = pd.merge(train_code, all_pdb[['pdb','mol_weight']], on=['pdb'])
@@ -87,7 +151,7 @@ def load_dataset(train, valid, test, feature_version):
     test_code.columns=['pdb', 'affinity']
     test_code = pd.merge(test_code, all_pdb[['pdb','mol_weight']], on=['pdb'])
 
-    if feature_version != "PLEC":
+    if feature_version != "PLEC" and feature_version != "DeltaVina":
         try:
             train_set = pd.merge(train_code, features, on=['pdb','affinity'])
             valid_set = pd.merge(valid_code, features, on=['pdb','affinity'])
@@ -99,6 +163,12 @@ def load_dataset(train, valid, test, feature_version):
             valid_set = valid_set.rename(columns={"affinity_y":"affinity"})
             test_set = pd.merge(test_code, features, on=['pdb'])
             test_set = test_set.rename(columns={"affinity_y":"affinity"})
+
+    elif feature_version == "DeltaVina":
+        deltavina_feature=pd.read_csv("/pubhome/hzhu02/models/Redocked_pose/models/extract_feature/delta_vina_features.csv")
+        train_set = pd.merge(train_code, deltavina_feature, on=['pdb','affinity'])
+        valid_set = pd.merge(valid_code, deltavina_feature, on=['pdb','affinity'])
+        test_set = pd.merge(test_code, deltavina_feature, on=['pdb','affinity'])
 
     else:
         try:
@@ -137,7 +207,7 @@ def load_grid_search_model(model_version, feature_list):
         model_search = GridSearchCV(model, {
             "n_estimators":[100,200,300,400,500],
             "max_features":list(range(min_tree_feature, max_tree_feature))
-        }, verbose=0, scoring="r2",cv=5)
+        }, verbose=0, scoring="neg_mean_absolute_error",cv=3)
 
     if model_version == "XGB":
         model = xgb.XGBRegressor()

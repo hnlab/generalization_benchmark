@@ -44,7 +44,10 @@ def main(args):
                 verbose=0)
         
 
-        model.fit(train_set[feature_list], train_set["affinity"])
+        if args['feature_version']!="DeltaVina":
+            model.fit(train_set[feature_list], train_set["affinity"])
+        else:
+            model.fit(train_set[feature_list], train_set["delta_label"])
         
     
     elif args["model"]=="XGB":
@@ -105,10 +108,17 @@ def main(args):
 
         model.fit(train_set[feature_list], train_set["affinity"])
 
-    sets = [
-    ('Train', train_set['pdb'].tolist(), model.predict(train_set[feature_list]), train_set['affinity']),
-    ('Valid', valid_set['pdb'].tolist(), model.predict(valid_set[feature_list]), valid_set['affinity']),
-    ('Test', test_set['pdb'].tolist(), model.predict(test_set[feature_list]), test_set['affinity'])]
+    if args['feature_version']!="DeltaVina":
+        sets = [
+        ('Train', train_set['pdb'].tolist(), model.predict(train_set[feature_list]), train_set['affinity']),
+        ('Valid', valid_set['pdb'].tolist(), model.predict(valid_set[feature_list]), valid_set['affinity']),
+        ('Test', test_set['pdb'].tolist(), model.predict(test_set[feature_list]), test_set['affinity'])]
+    else:
+        sets = [
+        ('Train', train_set['pdb'].tolist(), model.predict(train_set[feature_list])+train_set['Autodockvina_pkd'], train_set['affinity']),
+        ('Valid', valid_set['pdb'].tolist(), model.predict(valid_set[feature_list])+valid_set['Autodockvina_pkd'], valid_set['affinity']),
+        ('Test', test_set['pdb'].tolist(), model.predict(test_set[feature_list])+test_set['Autodockvina_pkd'], test_set['affinity'])]
+
 
 
     results = []
@@ -132,11 +142,11 @@ def main(args):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Protein-Ligand Binding affinity Prediction')
-    parser.add_argument("--train_data", type=str, default="split_dataset/3_fold/results/PCV/1/fold_1",help="training dataset")
-    parser.add_argument("--valid_data", type=str, default="split_dataset/3_fold/results/PCV/1/fold_1",help="training dataset")
-    parser.add_argument("--test_data", type=str, default="split_dataset/3_fold/results/PCV/1/fold_1", help="testing dataset")
-    parser.add_argument("--rf_max_features", type=int, default=4)
-    parser.add_argument("--rf_n_estimator",type=int, default=400)
+    parser.add_argument("--train_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/xaa",help="training dataset")
+    parser.add_argument("--valid_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/xab",help="training dataset")
+    parser.add_argument("--test_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/core.csv", help="testing dataset")
+    parser.add_argument("--rf_max_features", type=int, default=3)
+    parser.add_argument("--rf_n_estimator",type=int, default=100)
     parser.add_argument("--xgb_max_depth",type=int)
     parser.add_argument("--xgb_n_estimators",type=int)
     parser.add_argument("--xgb_eta", type=float)
@@ -148,7 +158,7 @@ if __name__ == "__main__":
     parser.add_argument("--sgdr_epsilon", type=float, default=0.1)
     parser.add_argument("--sgdr_es", type=bool, default=False)
     parser.add_argument("--output_path", type=str)
-    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC'])
+    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC','DeltaVina'])
     parser.add_argument("--model", type=str, choices=['LR','RF','XGB','NN','SGDR','NN+'])
     args = parser.parse_args()
     args = parser.parse_args().__dict__

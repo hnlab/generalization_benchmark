@@ -8,7 +8,7 @@ import seaborn as sns
 from scipy.stats import gaussian_kde
 import oddt
 from sklearn.ensemble import RandomForestRegressor
-import pickle
+import pickle5 as pickle
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import PredefinedSplit
 import matplotlib.pyplot as plt
@@ -35,21 +35,34 @@ def main(args):
     train_valid_set =pd.concat([train_set, valid_set])
 
     if args["model"] == "RF":
+        
         model = load_grid_search_model(args["model"], feature_list)
-        model.fit(train_valid_set[feature_list], train_valid_set['affinity'])
+        if args['feature_version']!= "DeltaVina":
+            model.fit(train_valid_set[feature_list], train_valid_set['affinity'])
+        else:
+            model.fit(train_valid_set[feature_list], train_valid_set['delta_label'])
 
 
         for param in model.best_params_.keys():
             print(args["feature_version"], param, model.best_params_[param])
 
-        sets = [
-        ('Train', train_set['pdb'].tolist(), model.best_estimator_.predict(train_set[feature_list]), train_set['affinity']),
-        ('Valid', valid_set['pdb'].tolist(), model.best_estimator_.predict(valid_set[feature_list]), valid_set['affinity']),
-        ('Test', test_set['pdb'].tolist(), model.best_estimator_.predict(test_set[feature_list]), test_set['affinity'])]
+        if args['feature_version']!= "DeltaVina":
+
+            sets = [
+            ('Train', train_set['pdb'].tolist(), model.best_estimator_.predict(train_set[feature_list]), train_set['affinity']),
+            ('Valid', valid_set['pdb'].tolist(), model.best_estimator_.predict(valid_set[feature_list]), valid_set['affinity']),
+            ('Test', test_set['pdb'].tolist(), model.best_estimator_.predict(test_set[feature_list]), test_set['affinity'])]
+        else:
+            sets = [
+            ('Train', train_set['pdb'].tolist(), model.predict(train_set[feature_list])+train_set['Autodockvina_pkd'], train_set['affinity']),
+            ('Valid', valid_set['pdb'].tolist(), model.predict(valid_set[feature_list])+valid_set['Autodockvina_pkd'], valid_set['affinity']),
+            ('Test', test_set['pdb'].tolist(), model.predict(test_set[feature_list])+test_set['Autodockvina_pkd'], test_set['affinity'])]
+
         
         
 
         pickle.dump(model.best_estimator_, open(args["output_path"]+"/RF_"+args["feature_version"]+"_best_model.pkl", "wb"))
+
     
     
     elif args["model"]=="XGB":
@@ -159,12 +172,12 @@ def main(args):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Protein-Ligand Binding affinity Prediction')
-    parser.add_argument("--train_data", type=str, default="./test_file/train.csv",help="training dataset")
-    parser.add_argument("--valid_data", type=str, default="./test_file/valid.csv",help="training dataset")
-    parser.add_argument("--test_data", type=str, default="./test_file/core.csv", help="testing dataset")
-    parser.add_argument("--output_path", type=str)
-    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC','PLEC'])
-    parser.add_argument("--model", type=str, choices=['LR','RF','XGB','NN','SGDR'])
+    parser.add_argument("--train_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/xaa",help="training dataset")
+    parser.add_argument("--valid_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/xab",help="validing dataset")
+    parser.add_argument("--test_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/core.csv", help="testing dataset")
+    parser.add_argument("--output_path", type=str, default="/pubhome/hzhu02/models/Redocked_pose/models/Descriptor_based_model/deltavina_test")
+    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC','PLEC','DeltaVina'], default="DeltaVina")
+    parser.add_argument("--model", type=str, choices=['LR','RF','XGB','NN','SGDR'], default="RF")
     args = parser.parse_args()
     args = parser.parse_args().__dict__
     for k, v in args.items():
