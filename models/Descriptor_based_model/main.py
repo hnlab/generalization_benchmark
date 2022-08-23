@@ -142,9 +142,9 @@ def main(args):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Protein-Ligand Binding affinity Prediction')
-    parser.add_argument("--train_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/xaa",help="training dataset")
-    parser.add_argument("--valid_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/xab",help="training dataset")
-    parser.add_argument("--test_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/refine_core/core.csv", help="testing dataset")
+    parser.add_argument("--train_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/general_core/train.csv",help="training dataset")
+    parser.add_argument("--valid_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/general_core/valid.csv",help="training dataset")
+    parser.add_argument("--test_data", type=str, default="/pubhome/hzhu02/GPSF/generalization_benchmark/datasets/general_core/core.csv", help="testing dataset")
     parser.add_argument("--rf_max_features", type=int, default=3)
     parser.add_argument("--rf_n_estimator",type=int, default=100)
     parser.add_argument("--xgb_max_depth",type=int)
@@ -157,9 +157,9 @@ if __name__ == "__main__":
     parser.add_argument("--sgdr_alpha", type=float, default=0.001)
     parser.add_argument("--sgdr_epsilon", type=float, default=0.1)
     parser.add_argument("--sgdr_es", type=bool, default=False)
-    parser.add_argument("--output_path", type=str)
-    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC','DeltaVina'])
-    parser.add_argument("--model", type=str, choices=['LR','RF','XGB','NN','SGDR','NN+'])
+    parser.add_argument("--output_path", type=str, default="./deltavina_test")
+    parser.add_argument("--feature_version", type=str, choices=['V','X','C','R1','R2','VR1','VR2','VB','VXC','DeltaVina'], default="DeltaVina")
+    parser.add_argument("--model", type=str, choices=['LR','RF','XGB','NN','SGDR','NN+'], default="RF")
     args = parser.parse_args()
     args = parser.parse_args().__dict__
     for k, v in args.items():
