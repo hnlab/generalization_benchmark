@@ -1,4 +1,4 @@
-# [Assessing the generalization abilities of machine-learning scoring functions for structure-based virtual screening](https://chemrxiv.org/engage/chemrxiv/article-details/62d53f80fe12e38913a7e287)
+# Assessment of the Generalization Abilities of Machine-Learning Scoring Functions for Structure-Based Virtual Screening
 Author: Hui Zhu, Jincai Yang*, and Niu Huang*
 ![](https://github.com/hnlab/generalization_benchmark/blob/main/png/Cover_Picture.png)
 
@@ -24,5 +24,5 @@ Author: Hui Zhu, Jincai Yang*, and Niu Huang*
 
 
 ## Citation
-
+[Assessment of the Generalization Abilities of Machine-Learning Scoring Functions for Structure-Based Virtual Screening](https://pubs.acs.org/doi/10.1021/acs.jcim.2c01149)
 
