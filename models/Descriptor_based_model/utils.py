@@ -26,8 +26,8 @@ def load_dataset(train, valid, test, feature_version):
                 'vina_hydrophobic_x',
                 'vina_hydrogen_x',
                 'vina_num_rotors']
-    xscore_title=['x_vwd','x_hb','x_hp','x_hm','x_hs','x_rt'] ## copy from other paper, note: general doesn't have xscore feature
-    cyscore_title = ['cy_hydrophobic','cy_vdw','cy_hbond','cy_ent'] ## copy from other paper, note: general doesn't have cyscore feature
+    xscore_title=['x_vwd','x_hb','x_hp','x_hm','x_hs','x_rt'] ## copy from other paper, note: general set doesn't have xscore feature
+    cyscore_title = ['cy_hydrophobic','cy_vdw','cy_hbond','cy_ent'] ## copy from other paper, note: general set doesn't have cyscore feature
     rf_v1_title = features.columns.tolist()[2:38]
     rf_v2_title = features.columns.tolist()[38:38+216]
     six_feature = ['vina_gauss1_x',
@@ -165,7 +165,7 @@ def load_dataset(train, valid, test, feature_version):
             test_set = test_set.rename(columns={"affinity_y":"affinity"})
 
     elif feature_version == "DeltaVina":
-        deltavina_feature=pd.read_csv("/pubhome/hzhu02/models/Redocked_pose/models/extract_feature/delta_vina_features.csv")
+        deltavina_feature=pd.read_csv("/pubhome/hzhu02/models/Redocked_pose/models/extract_feature/delta_vina_features.csv") ## modify the file path
         train_set = pd.merge(train_code, deltavina_feature, on=['pdb','affinity'])
         valid_set = pd.merge(valid_code, deltavina_feature, on=['pdb','affinity'])
         test_set = pd.merge(test_code, deltavina_feature, on=['pdb','affinity'])
